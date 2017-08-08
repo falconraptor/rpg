@@ -1,5 +1,5 @@
 from items import Item
-from stats import HealthStat, ManaStat, StaminaStat, LevelStat
+from stats import HealthStat, LevelStat, ManaStat, StaminaStat
 
 
 class Character:
@@ -11,14 +11,17 @@ class Character:
         self.level = LevelStat()
         self.inventory = Inventory()
 
+    def __getitem__(self, item):
+        if hasattr(self, item):
+            self.__getattribute__(item)
+        raise AttributeError('Attribute \'{}\' not defined'.format(item))
+
 
 class Inventory:
     def __init__(self, max_space=10, max_weight=10, items=None):
-        if items is None:
-            items = []
         self.max_space = max_space
         self.max_weight = max_weight
-        self.items = items
+        self.items = [i for i in items if isinstance(i, Item)] if items else []
 
     @property
     def max_space(self):
@@ -45,7 +48,7 @@ class Inventory:
         if len(items) > self.max_space:
             raise ValueError("Not enough space available to replace the inventory.")
         for item in items:
-            if type(item) != Item:
+            if not isinstance(item, Item):
                 raise TypeError('This item is not a Item: {}'.format(item))
         self.items = items
 
@@ -67,10 +70,10 @@ class Inventory:
 
     def insert_items(self, items):
         """Adds item(s) to the inventory"""
-        if type(items) != list:
+        if not isinstance(items, iter):
             items = [items]
         for item in items:
-            if type(item) != Item:
+            if not isinstance(item, Item):
                 raise TypeError('This item is not a Item: {}'.format(item))
             if self.space_available():
                 if self.weight_available() < item.weight:

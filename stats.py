@@ -1,3 +1,6 @@
+from numbers import Number
+
+
 class RegenStat:
     def __str__(self):
         return 'Regen: {}/{}'.format(self.current, self.max)
@@ -39,25 +42,32 @@ class RegenStat:
 
     def regen(self, amount=None):
         """
-        Regenerates health.
+        Regenerates a Stat.
 
         Keyword arguments:
             amount -- amount to regenerate
 
-        Accepts either none or an int.
+        Accepts either none or an Number (int, float).
         If none calculates amount to regen using max * regen_rate.
         Adds that amount to current health if not already maxed.
+
+        Returns that amount.
         """
         if not amount:
-            amount = int(self.max * self.regen_rate)
+            amount = self.max * self.regen_rate
         else:
-            if type(amount) != int:
-                amount = int(amount)
+            if not isinstance(amount, Number):
+                amount = float(amount)
         self.current += amount
         if self.current > self.max:
-            amount = self.max - self.current
+            amount = self.current - self.max
             self.current = self.max
         return amount
+
+    def __getitem__(self, item):
+        if hasattr(self, item):
+            self.__getattribute__(item)
+        raise AttributeError('Attribute \'{}\' not defined'.format(item))
 
 
 class ManaStat(RegenStat):
@@ -84,12 +94,11 @@ class StaminaStat(RegenStat):
         return 'Stamina: {}/{}'.format(self.current, self.max)
 
 
-class LevelStat:
+class LevelStat(RegenStat):
     def __init__(self, level=1, xp=0, max_xp=100, xp_rate=.2):
+        super().__init__(max=max_xp, regen_rate=xp_rate)
         self.level = level
-        self.max_xp = max_xp
-        self.xp_rate = xp_rate
-        self.xp = xp
+        self.current = xp
 
     @property
     def level(self):
@@ -100,18 +109,18 @@ class LevelStat:
         self.level = 0 if level < 0 else level
 
     @property
-    def max_xp(self):
-        return self.max_xp
+    def max(self):
+        return self.max
 
-    @max_xp.setter
-    def max_xp(self, max_xp):
-        if max_xp < 0:
-            self.max_xp = 0
-        elif max_xp <= self.xp:
-            self.max_xp = self.xp
+    @max.setter
+    def max(self, max):
+        if max < 0:
+            self.max = 0
+        elif max <= self.current:
+            self.max = self.current
             self.level_up()
         else:
-            self.max_xp = max_xp
+            self.max = max
 
     def level_up(self):
         """
@@ -119,34 +128,26 @@ class LevelStat:
 
         Returns whether or not the level up happened.
         """
-        if self.xp >= self.max_xp:
+        if self.current >= self.max:
             self.level += 1
-            self.xp -= self.max_xp
-            self.max_xp += self.max_xp * self.xp_rate
+            self.current -= self.max
+            self.max += self.max * self.regen_rate
             return True
         return False
 
     @property
-    def xp(self):
-        return self.xp
+    def current(self):
+        return self.current
 
-    @xp.setter
-    def xp(self, xp):
-        self.xp = 0 if xp < 0 else xp
-        if self.xp >= self.max_xp:
+    @current.setter
+    def current(self, current):
+        self.current = 0 if current < 0 else current
+        if self.current >= self.max:
             self.level_up()
 
-    @property
-    def xp_rate(self):
-        return self.xp_rate
-
-    @xp_rate.setter
-    def xp_rate(self, xp_rate):
-        self.xp_rate = 0 if xp_rate < 0 else xp_rate
-
     def __str__(self):
-        return 'Level: {}, {}/{}'.format(self.level, self.xp, self.max_xp)
+        return 'Level: {}, {}/{}'.format(self.level, self.current, self.max)
 
     def __repr__(self):
-        return '{}(level={}, xp={}, max_xp={}, xp_rate={})'.format(self.__class__.__name__, self.level, self.xp,
-                                                                   self.max_xp, self.xp_rate)
+        return '{}(level={}, xp={}, max_xp={}, xp_rate={})'.format(self.__class__.__name__, self.level, self.current,
+                                                                   self.max, self.regen_rate)

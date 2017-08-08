@@ -5,15 +5,13 @@ from stats import LevelStat
 
 
 class Weapon(Item):
-    def __init__(self, name, base_damage=1, max_damage=1, crit_chance=0, crit_bonus=.05, weight=1, level=1,
-                 max_xp=200, xp_rate=.5):
-        super().__init__(name=name)
+    def __init__(self, name, base_damage=1, max_damage=1, crit_chance=0, crit_bonus=.05, weight=1, level=None):
+        super().__init__(name=name, weight=weight)
         self.base_damage = base_damage
         self.max_damage = max_damage
         self.crit_chance = crit_chance
         self.crit_bonus = crit_bonus
-        self.weight = weight
-        self.level = LevelStat(level=level, max_xp=max_xp, xp_rate=xp_rate)
+        self.level = LevelStat(level=1, max_xp=200, xp_rate=.5) if not level else level
         self.abilities = {}
 
     def __str__(self):
