@@ -13,7 +13,7 @@ class Character:
 
     def __getitem__(self, item):
         if hasattr(self, item):
-            self.__getattribute__(item)
+            return self.__getattribute__(item)
         raise AttributeError('Attribute \'{}\' not defined'.format(item))
 
 

@@ -3,7 +3,7 @@ from numbers import Number
 
 class RegenStat:
     def __str__(self):
-        return 'Regen: {}/{}'.format(self.current, self.max)
+        return '{}: {}/{}'.format(self.__class__.__name__, self.current, self.max)
 
     def __repr__(self):
         return '{}(current={}, max={}, regen_rate={})'.format(self.__class__.__name__, self.current, self.max,
@@ -55,9 +55,8 @@ class RegenStat:
         """
         if not amount:
             amount = self.max * self.regen_rate
-        else:
-            if not isinstance(amount, Number):
-                amount = float(amount)
+        elif not isinstance(amount, Number):
+            amount = float(amount)
         self.current += amount
         if self.current > self.max:
             amount = self.current - self.max
@@ -74,24 +73,15 @@ class ManaStat(RegenStat):
     def __init__(self, max=100, regen_rate=.01):
         super().__init__(max, regen_rate)
 
-    def __str__(self):
-        return 'Mana: {}/{}'.format(self.current, self.max)
-
 
 class HealthStat(RegenStat):
     def __init__(self, max=100, regen_rate=.01):
         super().__init__(max, regen_rate)
 
-    def __str__(self):
-        return 'Health: {}/{}'.format(self.current, self.max)
-
 
 class StaminaStat(RegenStat):
     def __init__(self, max=100, regen_rate=.01):
         super().__init__(max, regen_rate)
-
-    def __str__(self):
-        return 'Stamina: {}/{}'.format(self.current, self.max)
 
 
 class LevelStat(RegenStat):
@@ -149,5 +139,5 @@ class LevelStat(RegenStat):
         return 'Level: {}, {}/{}'.format(self.level, self.current, self.max)
 
     def __repr__(self):
-        return '{}(level={}, xp={}, max_xp={}, xp_rate={})'.format(self.__class__.__name__, self.level, self.current,
-                                                                   self.max, self.regen_rate)
+        return '{}(level={}, xp={}, max_xp={}, xp_rate={})'.format(
+            self.__class__.__name__, self.level, self.current, self.max, self.regen_rate)
